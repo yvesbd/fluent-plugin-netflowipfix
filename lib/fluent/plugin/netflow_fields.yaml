@@ -1,0 +1,346 @@
+---
+option:
+  1:
+  - 4
+  - :in_bytes
+  2:
+  - 4
+  - :in_pkts
+  3:
+  - 4
+  - :flows
+  4:
+  - :uint8
+  - :protocol
+  5:
+  - :uint8
+  - :src_tos
+  6:
+  - :uint8
+  - :tcp_flags
+  7:
+  - :uint16
+  - :l4_src_port
+  8:
+  - :ip4_addr
+  - :ipv4_src_addr
+  9:
+  - :uint8
+  - :src_mask
+  10:
+  - 2
+  - :input_snmp
+  11:
+  - :uint16
+  - :l4_dst_port
+  12:
+  - :ip4_addr
+  - :ipv4_dst_addr
+  13:
+  - :uint8
+  - :dst_mask
+  14:
+  - 2
+  - :output_snmp
+  15:
+  - :ip4_addr
+  - :ipv4_next_hop
+  16:
+  - 2
+  - :src_as
+  17:
+  - 2
+  - :dst_as
+  18:
+  - :ip4_addr
+  - :bgp_ipv4_next_hop
+  19:
+  - 4
+  - :mul_dst_pkts
+  20:
+  - 4
+  - :mul_dst_bytes
+  21:
+  - :uint32
+  - :last_switched
+  22:
+  - :uint32
+  - :first_switched
+  23:
+  - 4
+  - :out_bytes
+  24:
+  - 4
+  - :out_pkts
+  25:
+  - :uint16
+  - :min_pkt_length
+  26:
+  - :uint16
+  - :max_pkt_length
+  27:
+  - :ip6_addr
+  - :ipv6_src_addr
+  28:
+  - :ip6_addr
+  - :ipv6_dst_addr
+  29:
+  - :uint8
+  - :ipv6_src_mask
+  30:
+  - :uint8
+  - :ipv6_dst_mask
+  31:
+  - 3
+  - :ipv6_flow_label
+  32:
+  - :uint16
+  - :icmp_type
+  33:
+  - :uint8
+  - :mul_igmp_type
+  34:
+  - :uint32
+  - :sampling_interval
+  35:
+  - :uint8
+  - :sampling_algorithm
+  36:
+  - :uint16
+  - :flow_active_timeout
+  37:
+  - :uint16
+  - :flow_inactive_timeout
+  38:
+  - :uint8
+  - :engine_type
+  39:
+  - :uint8
+  - :engine_id
+  40:
+  - 4
+  - :total_bytes_exp
+  41:
+  - 4
+  - :total_pkts_exp
+  42:
+  - 4
+  - :total_flows_exp
+  43:
+  - 4
+  - :skip43
+  44:
+  - :ip4_addr
+  - :ipv4_src_prefix
+  45:
+  - :ip4_addr
+  - :ipv4_dst_prefix
+  46:
+  - :uint8
+  - :mpls_top_label_type
+  47:
+  - :uint32
+  - :mpls_top_label_ip_addr
+  48:
+  - 1
+  - :flow_sampler_id
+  49:
+  - :uint8
+  - :flow_sampler_mode
+  50:
+  - :uint32
+  - :flow_sampler_random_interval
+  51:
+  - 1
+  - :skip51
+  52:
+  - :uint8
+  - :min_ttl
+  53:
+  - :uint8
+  - :max_ttl
+  54:
+  - :uint16
+  - :ipv4_ident
+  55:
+  - :uint8
+  - :dst_tos
+  56:
+  - :mac_addr
+  - :in_src_mac
+  57:
+  - :mac_addr
+  - :out_dst_mac
+  58:
+  - :uint16
+  - :src_vlan
+  59:
+  - :uint16
+  - :dst_vlan
+  60:
+  - :uint8
+  - :ip_protocol_version
+  61:
+  - :uint8
+  - :direction
+  62:
+  - :ip6_addr
+  - :ipv6_next_hop
+  63:
+  - :ip6_addr
+  - :bgp_ipv6_next_hop
+  64:
+  - :uint32
+  - :ipv6_option_headers
+  65:
+  - 1
+  - :skip65
+  66:
+  - 1
+  - :skip66
+  67:
+  - 1
+  - :skip67
+  68:
+  - 1
+  - :skip68
+  69:
+  - 1
+  - :skip69
+  70:
+  - :mpls_label
+  - :mpls_label_1
+  71:
+  - :mpls_label
+  - :mpls_label_2
+  72:
+  - :mpls_label
+  - :mpls_label_3
+  73:
+  - :mpls_label
+  - :mpls_label_4
+  74:
+  - :mpls_label
+  - :mpls_label_5
+  75:
+  - :mpls_label
+  - :mpls_label_6
+  76:
+  - :mpls_label
+  - :mpls_label_7
+  77:
+  - :mpls_label
+  - :mpls_label_8
+  78:
+  - :mpls_label
+  - :mpls_label_9
+  79:
+  - :mpls_label
+  - :mpls_label_10
+  80:
+  - :mac_addr
+  - :in_dst_mac
+  81:
+  - :mac_addr
+  - :out_src_mac
+  82:
+  - :string
+  - :if_name
+  83:
+  - :string
+  - :if_desc
+  84:
+  - :string
+  - :sampler_name
+  89:
+  - :uint8
+  - :forwarding_status
+  91:
+  - :uint8
+  - :mpls_prefix_len
+  234:
+  - :uint32
+  - :ingress_vrf_id
+  235:
+  - :uint32
+  - :egress_vrf_id
+  236:
+  - :string
+  - :vrf_name
+  148:
+  - 4
+  - :NF_F_CONN_ID
+  176:
+  - 1
+  - :NF_F_ICMP_TYPE
+  177:
+  - 1
+  - :NF_F_ICMP_CODE
+  152:
+  - 8
+  - :NF_F_FLOW_CREATE_TIME_MSEC
+  233:
+  - 1
+  - :NF_F_FW_EVENT
+  323:
+  - 8
+  - :NF_F_EVENT_TIME_MSEC
+  33000:
+  - 12
+  - :NF_F_INGRESS_ACL_ID
+  33001:
+  - 12
+  - :NF_F_EGRESS_ACL_ID
+  33002:
+  - 2
+  - :NF_F_FW_EXT_EVENT
+  40000:
+  - 20
+  - :NF_F_USERNAME
+  40001:
+  - 4
+  - skip40001
+  40002:
+  - 4
+  - skip40002
+  40003:
+  - 2
+  - skip40003
+  40004:
+  - 2
+  - skip40004
+  40005:
+  - 1
+  - skip40005
+  85:
+  - 4
+  - skip85
+  178:
+  - 1
+  - skip178
+  179:
+  - 1
+  - skip179
+  231:
+  - 4
+  - skip231
+#  232:
+#  - 4
+#  - skip232
+
+scope:
+  1:
+  - :ip4_addr
+  - :system
+  2:
+  - 1
+  - :skip2
+  3:
+  - 1
+  - :skip3
+  4:
+  - 1
+  - :skip4
+  5:
+  - 1
+  - :skip5
