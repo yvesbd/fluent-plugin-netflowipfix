@@ -3,12 +3,12 @@ $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 
 Gem::Specification.new do |spec|
   spec.name    = "fluent-plugin-netflowipfix"
-  spec.version = "0.9.0"
+  spec.version = "1.0.0"
   spec.authors = ["Yves Desharnaus"]
   spec.email   = ["yvesbd@gmail.com"]
 
   spec.summary       = %q{Fluentd Netflow (v5, v9) and IpFix (v10) Input plugin.}
-  spec.description   = %q{Created to replace and add missing functionality to the fliuent-plufin-netflox fluentd plugin.}
+  spec.description   = %q{Created to replace and add missing functionality to the fluent-plugin-netflow fluentd plugin.}
   spec.homepage      = "https://github.com/yvesbd/fluent-plugin-netflowipfix"
   spec.license       = "Apache-2.0"
 
