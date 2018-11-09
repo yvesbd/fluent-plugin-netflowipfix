@@ -43,6 +43,7 @@ module Fluent
 		#			@versions = [5, 9, 10]
 					@definitions = definitions
 					@missingTemplates = {}
+					@skipUnsupportedField = {}
 				end # def configure
   		
 				private
@@ -78,7 +79,14 @@ module Fluent
 					def netflowipfix_field_for(type, length, p_fields, category='option', key)
 						unless field = p_fields[category][type]
 							# TODO?: repeated message, but acceptable now
-							$log.warn "Skip unsupported field", type: type, length: length, key:key
+							# Skip unsupported field type=201 length=4 key="172.17.0.1|0|2049
+							fkey = "#{key}|#{type}|#{length}"
+							if @skipUnsupportedField[fkey].nil? || @skipUnsupportedField[fkey] == 0
+								$log.warn "Skip unsupported field", type: type, length: length, key:key
+								@skipUnsupportedField[fkey] = 1
+							else
+								@skipUnsupportedField[fkey] = @skipUnsupportedField[fkey] + 1
+							end
 							return [[:skip, nil, {length: length}]]
 						end # unless
 

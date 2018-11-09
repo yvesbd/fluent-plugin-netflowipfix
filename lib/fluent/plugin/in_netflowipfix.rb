@@ -78,7 +78,7 @@ module Fluent
 
 			def receive_data(host, data)
 				# if (@debug) 
-				log.on_debug { log.debug "received logs", :host => host, :data => data }
+#				log.on_debug { log.debug "received logs", :host => host, :data => data }
 				call(data, host) { |time, record|
 				unless time && record
 					log.warn "pattern not match: #{data.inspect}"
