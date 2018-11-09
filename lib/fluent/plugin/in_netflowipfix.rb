@@ -125,8 +125,8 @@ module Fluent
 					when 10
 						packet = Netflow10Packet.read(payload)
 						@parser_v10.handle_v10(host, packet, block)
-				else
-					$log.warn "Unsupported Netflow version v#{version}: #{version.class}"
+					else
+						$log.warn "Unsupported Netflow version v#{version}: #{version.class}"
 				end # case
 			end # def call
 
