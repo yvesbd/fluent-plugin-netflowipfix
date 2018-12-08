@@ -71,7 +71,6 @@ module Fluent
 
 
 
-      private
 
       def handle_v5(host, packet, block)
         packet.records.each do |flowset|
