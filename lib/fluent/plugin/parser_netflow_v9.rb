@@ -219,7 +219,13 @@ module Fluent
 							#  end
 							#end
 
-							block.call(time, event)
+#							block.call(time, event)
+#							if (defined?(block)).nil?
+#								log.error "*** handle_flowset_data block is blank"
+#							else
+#							end
+							  block.call(time, event, host)
+
 						end # fields = array.read
 					end # def handle_flowset_data
 

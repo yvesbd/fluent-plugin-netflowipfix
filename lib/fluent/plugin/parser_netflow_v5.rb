@@ -71,7 +71,6 @@ module Fluent
 
 
 
-
       def handle_v5(host, packet, block)
         packet.records.each do |flowset|
           # handle_flowset_data(host, packet, flowset, block, null, null)
@@ -111,7 +110,7 @@ module Fluent
           end # unless
 
           time = Time.at(packet.unix_sec, packet.unix_nsec / 1000).to_i # TODO: Fluent::EventTime
-          block.call(time, record)
+          block.call(time, record, host)
         end # do flowset
       end # def handle_v5
 
