@@ -2,3 +2,5 @@
 *.gem
 lib/.DS_Store
 lib/fluent/.DS_Store
+lib/.DS_Store
+lib/fluent/.DS_Store
