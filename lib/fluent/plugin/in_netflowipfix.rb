@@ -30,15 +30,16 @@ module Fluent
       include DetachMultiProcessMixin
 
 class PortConnection
-	def initialize(bind, port, tag, cache_ttl, definitions, queuesleep)
+	def initialize(bind, port, tag, cache_ttl, definitions, queuesleep, log)
 		@bind = bind
 		@port = port
 		@tag = tag
 		@cache_ttl = cache_ttl
 		@definitions = definitions
 		@eventQueue = Queue.new
-		@udpQueue = Queue.new
+#		@udpQueue = Queue.new
 		@queuesleep = queuesleep
+		@log = log
 	end
 	
 	def bind
@@ -52,8 +53,8 @@ class PortConnection
 	end
 	
 	def start
-		@thread_udp = UdpListenerThread.new(@bind, @port, @udpQueue, @tag)
-		@thread_parser = ParserThread.new(@udpQueue, @queuesleep, @eventQueue, @cache_ttl, @definitions)
+		@thread_udp = UdpListenerThread.new(@bind, @port, @udpQueue, @tag, @log)
+		@thread_parser = ParserThread.new(@udpQueue, @queuesleep, @eventQueue, @cache_ttl, @definitions, @log)
 		@thread_udp.start
 		@thread_parser.start
 	end # def start
@@ -73,13 +74,6 @@ class PortConnection
 	end
 
 
-#	def udpqueue_pop
-#		@udpQueue.pop
-#	end
-	
-#	def udpqueue_length
-#		@udpQueue.length
-#	end
 end #class PortConnection
 
 		config_param :tag, :string
@@ -93,7 +87,7 @@ end #class PortConnection
 			@@connections ||=  {}
 			if @@connections.nil?
 			end
-			@@connections[@port] = PortConnection.new(@bind, @port, @tag, @cache_ttl, @definitions, @queuesleep)
+			@@connections[@port] = PortConnection.new(@bind, @port, @tag, @cache_ttl, @definitions, @queuesleep, log)
 			log.debug "NetflowipfixInput::configure NB=#{@@connections.length}"	
 			@total = 0
 		end
@@ -108,15 +102,8 @@ end #class PortConnection
 					$log.debug "start listening UDP on #{conn.bind}:#{conn.port}"
 					conn.start				
 				end
-			end
+			end			
 			
-			
-#			@eventQueue = Queue.new
-#			@udpQueue = Queue.new
-#			@thread_udp = UdpListenerThread.new(@bind, @port, @udpQueue)
-#			@thread_parser = ParserThread.new(@udpQueue, @queuesleep, @eventQueue, @cache_ttl, @definitions)
-#			@thread_udp.start
-#			@thread_parser.start
 			waitForEvents
 		end
 
@@ -125,8 +112,6 @@ end #class PortConnection
 			$log.debug "NetflowipfixInput::shutdown NB=#{@@connections.length}"	
 			if @@connections.nil?
 			else
-#				$log.debug "listening UDP on #{@bind}:#{@port}"
-#				@connections[@port].stop
 				@@connections.each do | port, conn |
 					$log.debug "shutdown listening UDP on #{conn.bind}:#{conn.port}"
 					conn.stop				
@@ -134,42 +119,29 @@ end #class PortConnection
 				@@connections = nil
 			end
 
-#			@thread_udp.close
-#			@thread_udp.join
-#			@thread_parser.close
-#			@thread_parser.join
 		end		
 		
 
 		def waitForEvents
-#		puts "Main::run begin #{@eventQueue.length}"
 			loop do
 					@@connections.each do | port, conn |
 						if (conn.event_queue_length > 0) 
-							$log.debug "waitForEvents: #{conn.bind}:#{conn.port}"
-							ar = conn.event_pop			
-							time = ar[0]
-							record = ar[1]
-							router.emit(conn.tag, EventTime.new(time.to_i), record)
+							$log.trace "waitForEvents: #{conn.bind}:#{conn.port} queue has #{conn.event_queue_length} elements"
+							nbq = conn.event_queue_length 
+							loop do
+								ar = conn.event_pop			
+								time = ar[0]
+								record = ar[1]
+								router.emit(conn.tag, EventTime.new(time.to_i), record)
+								nbq = nbq - 1
+								break if nbq == 0
+							end 
 						end
 					end
+					$log.trace "waitForEvents: sleep #{@queuesleep}"
 					sleep(@queuesleep)
 
-#				if @eventQueue.length > 0
-				
-				
-#					ar = @eventQueue.pop
-#					time = ar[0]
-#					record = ar[1]
-#					router.emit(@tag, EventTime.new(time.to_i), record)
-
-
-#		puts "Main::pop before #{@eventQueue.length} #{@tag} #{time}" # #{record.to_s}"
-#		puts "Main::pop after  #{@eventQueue.length}"
-#				else
-#				end
 			end
-#		puts "Main::run end #{@eventQueue.length}"
 
 		end
 
@@ -178,18 +150,19 @@ end #class PortConnection
 
 class UdpListenerThread
 
-	def initialize(bind, port, udpQueue, tag)
+	def initialize(bind, port, udpQueue, tag, log)
 		@port = port
 		@udpQueue = udpQueue
 		@udp_socket = UDPSocket.new
 		@udp_socket.bind(bind, port)
 		@total = 0
 		@tag = tag
+		@log = log
 	end
 
 	def start
 		@thread = Thread.new(&method(:run))
-		puts "UdpListenerThread::start"
+		@log.trace "UdpListenerThread::start"
 	end 
 	
 	def close
@@ -205,8 +178,7 @@ class UdpListenerThread
 			loop do
 				msg, sender =  @udp_socket.recvfrom(4096)
 				@total = @total + msg.length
-#		puts "UdpListenerThread::recvfrom #{msg.length} bytes for #{@total} total on UDP/#{@port}"
-#				log.debug "Received #{msg.length} bytes for #{@total} total"
+				@log.trace "UdpListenerThread::recvfrom #{msg.length} bytes for #{@total} total on UDP/#{@port}"
 				record = {}
 				record["message"] = msg
 				record["length"] = msg.length
@@ -215,17 +187,17 @@ class UdpListenerThread
 				record["port"] = @port
 #				time = EventTime.new()
 				time = Time.now.getutc
-#				router.emit(@tag, EventTime.new(), record)
 				@udpQueue << [time, record]
 			end
 	end
 end # class UdpListenerThread
 		
 class ParserThread
-	def initialize(udpQueue, queuesleep, eventQueue, cache_ttl, definitions)
+	def initialize(udpQueue, queuesleep, eventQueue, cache_ttl, definitions, log)
 		@udpQueue = udpQueue
 		@queuesleep = queuesleep
 		@eventQueue = eventQueue
+		@log = log
 
 		@parser_v5 = NetflowipfixInput::ParserNetflowv5.new
 		@parser_v9 = NetflowipfixInput::ParserNetflowv9.new
@@ -236,7 +208,7 @@ class ParserThread
 	end
 	def start
 		@thread = Thread.new(&method(:run))
-		puts "ParserThread::start"
+		@log.debug "ParserThread::start"
 	end 
 	
 	def close
@@ -247,16 +219,12 @@ class ParserThread
 	end
 	
 	def run
-#		puts "ParserThread::run start #{@udpQueue.length}"
-
 		loop do
 			if @udpQueue.length == 0
-#		puts "ParserThread::run sleep #{@queuesleep}"
 				sleep(@queuesleep)
 
 			else
 				block = method(:emit)
-#block = nil
 				ar = @udpQueue.pop
 				time = ar[0]
 				msg = ar[1]
@@ -264,8 +232,7 @@ class ParserThread
 				host = msg["sender"]
 				
 				version,_ = payload[0,2].unpack('n')
-#		puts "ParserThread::pop #{@udpQueue.length} v#{version}"
-
+				@log.trace "ParserThread::pop #{@udpQueue.length} v#{version}"
 
 				case version
 					when 5          
@@ -278,11 +245,9 @@ class ParserThread
 						packet = NetflowipfixInput::Netflow10Packet.read(payload)
 						@parser_v10.handle_v10(host, packet, block)
 					else
-#						$log.warn "Unsupported Netflow version v#{version}: #{version.class}"
+						$log.warn "Unsupported Netflow version v#{version}: #{version.class}"
 				end # case
 
-#				parent_call(time, record)
-#				@eventQueue << [time, record]
 			end
 		end # loop do
 	end # def run
@@ -291,7 +256,7 @@ class ParserThread
 			event["host"] = host
 		end
 		@eventQueue << [time, event]
-# puts "ParserThread::emit #{@eventQueue.length}"
+ 		@log.trace "ParserThread::emit #{@eventQueue.length}"
 	end # def emit
 
 end # class ParserThread
