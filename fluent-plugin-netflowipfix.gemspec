@@ -3,7 +3,7 @@ $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 
 Gem::Specification.new do |spec|
   spec.name    = "fluent-plugin-netflowipfix"
-  spec.version = "1.1.0"
+  spec.version = "1.2.1"
   spec.authors = ["Yves Desharnaus"]
   spec.email   = ["yvesbd@gmail.com"]
 

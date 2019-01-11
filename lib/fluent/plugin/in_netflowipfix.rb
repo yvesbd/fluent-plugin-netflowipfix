@@ -37,7 +37,7 @@ class PortConnection
 		@cache_ttl = cache_ttl
 		@definitions = definitions
 		@eventQueue = Queue.new
-#		@udpQueue = Queue.new
+		@udpQueue = Queue.new
 		@queuesleep = queuesleep
 		@log = log
 	end
