@@ -65,6 +65,16 @@ class PortConnection
 			@thread_parser.join
 	end # def stop
 	
+	def restartParser
+		if !@thread_parser.nil?
+			@thread_parser.close
+			@thread_parser.join
+			@thread_parser = nil
+		end
+		@thread_parser = ParserThread.new(@udpQueue, @queuesleep, @eventQueue, @cache_ttl, @definitions, @log)
+		@thread_parser.start
+	end
+	
 	def event_pop
 		@eventQueue.pop
 	end
@@ -120,9 +130,21 @@ end #class PortConnection
 			end
 
 		end		
-		
+
+		def restartConnections
+				@@connections.each do | port, conn |
+					$log.debug "restart parser #{conn.bind}:#{conn.port}"
+					conn.restartParser				
+				end
+					before = GC.stat(:total_freed_objects)
+					GC.start
+					after = GC.stat(:total_freed_objects)
+
+		end		
 
 		def waitForEvents
+			timeStart = Time.now.getutc.to_i
+			nb = 0
 			loop do
 					@@connections.each do | port, conn |
 						if (conn.event_queue_length > 0) 
@@ -133,12 +155,31 @@ end #class PortConnection
 								time = ar[0]
 								record = ar[1]
 								router.emit(conn.tag, EventTime.new(time.to_i), record)
+								# Free up variables for garbage collection
+								ar = nil
+								time = nil
+								record = nil
+								nb = nb + 1
 								nbq = nbq - 1
 								break if nbq == 0
 							end 
 						end
 					end
-					$log.trace "waitForEvents: sleep #{@queuesleep}"
+#					@log.trace "NetflowipfixInput::waitForEvents ObjectSpace.memsize_of(NetflowipfixInput)=#{ObjectSpace.memsize_of(self)}"
+					if Time.now.getutc.to_i - timeStart > 600 # 300 = 5 min
+						restartConnections
+						timeStart = Time.now.getutc.to_i
+					end
+
+					# Garbage collection
+					if nb >= 20
+						nb = 0
+#						debugSpace
+					end
+					before = GC.stat(:total_freed_objects)
+					GC.start
+					after = GC.stat(:total_freed_objects)
+#					$log.trace "waitForEvents: sleep #{@queuesleep}"
 					sleep(@queuesleep)
 
 			end
@@ -175,6 +216,7 @@ class UdpListenerThread
 	
 	
 	def run
+		nb = 0 
 			loop do
 				msg, sender =  @udp_socket.recvfrom(4096)
 				@total = @total + msg.length
@@ -188,6 +230,15 @@ class UdpListenerThread
 #				time = EventTime.new()
 				time = Time.now.getutc
 				@udpQueue << [time, record]
+				# Garbage collection
+				msg = nil
+				sender = nil
+				nb = nb + 1
+				if nb > 100
+					GC.start
+					nb = 0
+				end
+
 			end
 	end
 end # class UdpListenerThread
@@ -212,6 +263,11 @@ class ParserThread
 	end 
 	
 	def close
+		# Garbage collection
+		@parser_v5 = nil
+		@parser_v9 = nil
+		@parser_v10 = nil
+		GC.start
 	end
 	
 	def join
@@ -247,6 +303,14 @@ class ParserThread
 					else
 						$log.warn "Unsupported Netflow version v#{version}: #{version.class}"
 				end # case
+
+				# Free up variables for garbage collection
+				ar = @udpQueue.pop
+				version = nil
+				time = nil
+				msg = nil
+				payload = nil
+				host = nil
 
 			end
 		end # loop do
